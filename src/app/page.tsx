@@ -1,95 +1,70 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
+import { useFetch } from "components/hooks/useFetch";
+
+import styles from "./page.module.css";
+import { Table } from "components/components/Table";
+import { Avatar } from "components/components/Avatar";
+import useDidMountEffect from "components/hooks/useDidMountEffect";
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+	const [page, setPage] = useState(1);
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+	const [usersData, fetchUsers] = useFetch();
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+	useDidMountEffect(() => {
+		fetchUsers({
+			method: "get",
+			url: `users?page=${page}`,
+		});
+	}, [page]);
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+	const columns = useMemo(() => {
+		return [
+			{
+				key: "avatar",
+				title: "Avatar",
+				render: (record: any) => (
+					<Avatar width={90} height={90} src={record.avatar} />
+				),
+			},
+			{
+				key: "first_name",
+				title: "First Name",
+			},
+			{
+				key: "last_name",
+				title: "Last Name",
+			},
+			{
+				key: "email",
+				title: "Email",
+			},
+		];
+	}, []);
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
+	const paginationProps = useMemo(() => {
+		return {
+			hasNextPage: usersData?.data?.page < usersData?.data?.total_pages,
+			hasPreviousPage: usersData?.data?.page > 1,
+			pageIndex: usersData?.data?.page,
+			pageSize: usersData?.data?.per_page,
+			totalPages: usersData?.data?.total_pages,
+		};
+	}, [usersData?.data]);
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+	return (
+		<main className={styles.main}>
+			<Table
+				hasPagination={usersData?.data?.total_pages > 1}
+				columns={columns}
+				data={usersData?.data?.data ?? []}
+				onChange={setPage}
+				paginationData={paginationProps}
+				hasDivider
+				loading={usersData?.loading}
+			/>
+		</main>
+	);
 }

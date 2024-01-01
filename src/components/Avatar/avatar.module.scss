@@ -1,0 +1,18 @@
+.hexagon {
+  position: relative;
+  mask-image: url("/frame/BG-hexagon.svg");
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  mask-position: center;
+  background: linear-gradient(rgba(254, 148, 2, 1), rgba(255, 255, 255, 0));
+}
+
+
+.hexagon img {
+  object-fit: cover;
+  -webkit-mask-image: url("/frame/BG-hexagon.svg");
+  mask-image: url("/frame/BG-hexagon.svg");
+  mask-repeat: no-repeat;
+  mask-size: cover;
+  mask-position: center;
+}
